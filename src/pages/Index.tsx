@@ -58,7 +58,7 @@ const Index = () => {
                 <div className="absolute -bottom-8 -left-8 w-60 h-60 bg-secondary rounded-full opacity-20 animate-pulse-slow"></div>
                 
                 <img 
-                  src="https://placehold.co/800x1000" 
+                  src="public/images/licensed-image2.jpg"
                   alt="Dating app illustration" 
                   className="relative z-10 mx-auto w-full max-w-md rounded-2xl shadow-xl"
                 />
