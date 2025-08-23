@@ -1,22 +1,22 @@
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { AuthModal } from "@/components/AuthModal";
 import { Heart, Search, MessageSquare } from "lucide-react";
 
 const Index = () => {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState<"login" | "signup">("signup");
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  const openAuthModal = (tab: "login" | "signup") => {
-    setAuthModalTab(tab);
-    setIsAuthModalOpen(true);
-  };
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -37,7 +37,7 @@ const Index = () => {
                 <Button 
                   size="lg" 
                   className="bg-love-500 hover:bg-love-600 text-white shadow-lg"
-                  onClick={() => openAuthModal("signup")}
+                  onClick={() => navigate("/auth")}
                 >
                   Get Started Now
                 </Button>
@@ -45,7 +45,7 @@ const Index = () => {
                   size="lg" 
                   variant="outline" 
                   className="border-love-500 text-love-500 hover:bg-love-100"
-                  onClick={() => openAuthModal("login")}
+                  onClick={() => navigate("/auth")}
                 >
                   Log In
                 </Button>
@@ -123,7 +123,7 @@ const Index = () => {
             <Button 
               size="lg" 
               className="bg-love-500 hover:bg-love-600 shadow-md"
-              onClick={() => openAuthModal("signup")}
+              onClick={() => navigate("/auth")}
             >
               Start Your Journey
             </Button>
@@ -201,7 +201,7 @@ const Index = () => {
             size="lg" 
             variant="secondary"
             className="bg-white text-love-600 hover:bg-white/90 shadow-lg"
-            onClick={() => openAuthModal("signup")}
+            onClick={() => navigate("/auth")}
           >
             Create Your Free Profile
           </Button>
@@ -209,12 +209,6 @@ const Index = () => {
       </section>
       
       <Footer />
-      
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-        defaultTab={authModalTab}
-      />
     </div>
   );
 };

@@ -3,16 +3,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   
-  // Mock authentication - to be replaced with actual auth
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    setIsLoggedIn(!!user);
-    
     const handleScroll = () => {
       if (window.scrollY > 10) {
         setIsScrolled(true);
@@ -24,6 +21,10 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-background/80 backdrop-blur-md shadow-sm" : "bg-transparent"}`}>
@@ -38,7 +39,7 @@ export function Navbar() {
           
           <div className="hidden md:block">
             <div className="ml-10 flex items-center space-x-4">
-              {isLoggedIn ? (
+              {user ? (
                 <>
                   <Link to="/dashboard" className="text-foreground/70 hover:text-love-500 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                     Find Matches
@@ -51,19 +52,26 @@ export function Navbar() {
                       Profile
                     </Button>
                   </Link>
+                  <Button 
+                    variant="ghost" 
+                    onClick={handleSignOut}
+                    className="rounded-full hover:bg-love-100 hover:text-love-500"
+                  >
+                    Sign Out
+                  </Button>
                 </>
               ) : (
                 <>
-                  <Link to="/dashboard" className="text-foreground/70 hover:text-love-500 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  <a href="#how-it-works" className="text-foreground/70 hover:text-love-500 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                     How It Works
-                  </Link>
-                  <Link to="/" className="text-foreground/70 hover:text-love-500 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  </a>
+                  <a href="#testimonials" className="text-foreground/70 hover:text-love-500 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                     Success Stories
-                  </Link>
-                  <Link to="/">
+                  </a>
+                  <Link to="/auth">
                     <Button variant="ghost">Log In</Button>
                   </Link>
-                  <Link to="/">
+                  <Link to="/auth">
                     <Button className="bg-love-500 hover:bg-love-600">Sign Up</Button>
                   </Link>
                 </>
