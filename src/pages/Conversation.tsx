@@ -130,7 +130,7 @@ const Conversation = () => {
         
         const updatedMessages = prevConversation.messages.map((msg, i) => {
           if (i === prevConversation.messages.length - 1) {
-            return { ...msg, status: "sent" };
+            return { ...msg, status: "sent" as MessageProps["status"] };
           }
           return msg;
         });
@@ -145,7 +145,7 @@ const Conversation = () => {
         
         const updatedMessages = prevConversation.messages.map((msg, i) => {
           if (i === prevConversation.messages.length - 1) {
-            return { ...msg, status: "delivered" };
+            return { ...msg, status: "delivered" as MessageProps["status"] };
           }
           return msg;
         });
@@ -182,7 +182,7 @@ const Conversation = () => {
             // Update previous message to "read"
             const updatedMessages = prevConversation.messages.map((msg, i) => {
               if (i === prevConversation.messages.length - 1) {
-                return { ...msg, status: "read" };
+                return { ...msg, status: "read" as MessageProps["status"] };
               }
               return msg;
             });
