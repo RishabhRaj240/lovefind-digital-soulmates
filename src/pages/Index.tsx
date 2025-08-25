@@ -58,8 +58,8 @@ const Index = () => {
                 <div className="absolute -bottom-8 -left-8 w-60 h-60 bg-secondary rounded-full opacity-20 animate-pulse-slow"></div>
                 
                 <img 
-                  src="public/images/licensed-image2.jpg"
-                  alt="Dating app illustration" 
+                  src="/lovable-uploads/6773da74-69b1-4218-afab-43c4b1db4af0.png"
+                  alt="Happy couple connecting through LoveFind" 
                   className="relative z-10 mx-auto w-full max-w-md rounded-2xl shadow-xl"
                 />
                 
