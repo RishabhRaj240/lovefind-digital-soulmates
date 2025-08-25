@@ -44,7 +44,7 @@ export const useMessages = () => {
           *,
           conversation_participants!inner (
             user_id,
-            profile:profiles (
+            profiles (
               first_name,
               last_name,
               avatar_url
@@ -88,6 +88,13 @@ export const useMessages = () => {
   const createConversation = async (otherUserId: string) => {
     if (!user) return null;
 
+    // For sample profiles, just show a notification instead of creating real conversations
+    const isSampleProfile = otherUserId.startsWith('550e8400-e29b-41d4-a716-44665544000');
+    if (isSampleProfile) {
+      // Return a mock conversation ID for sample profiles
+      return `sample-conversation-${otherUserId}`;
+    }
+
     try {
       // Check if conversation already exists
       const { data: existingConv } = await supabase
@@ -102,7 +109,7 @@ export const useMessages = () => {
             .select("conversation_id")
             .eq("conversation_id", conv.conversation_id)
             .eq("user_id", otherUserId)
-            .single();
+            .maybeSingle();
 
           if (otherParticipant) {
             return conv.conversation_id;
@@ -176,7 +183,7 @@ export const useMessages = () => {
           *,
           conversation_participants (
             user_id,
-            profile:profiles (
+            profiles (
               first_name,
               last_name,
               avatar_url

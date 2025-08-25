@@ -30,8 +30,8 @@ export const useMatches = () => {
         .from("matches")
         .select(`
           *,
-          user1_profile:profiles!matches_user1_id_fkey(*),
-          user2_profile:profiles!matches_user2_id_fkey(*)
+          user1_profile:profiles!user1_id(*),
+          user2_profile:profiles!user2_id(*)
         `)
         .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
         .order("matched_at", { ascending: false });

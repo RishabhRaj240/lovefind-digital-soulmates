@@ -20,7 +20,7 @@ export interface Profile {
 const sampleProfiles: Profile[] = [
   {
     id: 'sample-1',
-    user_id: 'sample-user-1',
+    user_id: '550e8400-e29b-41d4-a716-446655440001',
     first_name: 'Sarah',
     last_name: 'Johnson',
     age: 28,
@@ -33,7 +33,7 @@ const sampleProfiles: Profile[] = [
   },
   {
     id: 'sample-2',
-    user_id: 'sample-user-2',
+    user_id: '550e8400-e29b-41d4-a716-446655440002',
     first_name: 'Michael',
     last_name: 'Chen',
     age: 32,
@@ -46,7 +46,7 @@ const sampleProfiles: Profile[] = [
   },
   {
     id: 'sample-3',
-    user_id: 'sample-user-3',
+    user_id: '550e8400-e29b-41d4-a716-446655440003',
     first_name: 'Emma',
     last_name: 'Rodriguez',
     age: 26,
@@ -59,7 +59,7 @@ const sampleProfiles: Profile[] = [
   },
   {
     id: 'sample-4',
-    user_id: 'sample-user-4',
+    user_id: '550e8400-e29b-41d4-a716-446655440004',
     first_name: 'David',
     last_name: 'Thompson',
     age: 30,
@@ -71,6 +71,28 @@ const sampleProfiles: Profile[] = [
     updated_at: new Date().toISOString(),
   },
 ];
+
+// State to track swiped sample profiles in local storage
+const getSwipedSampleProfiles = (): string[] => {
+  try {
+    const swiped = localStorage.getItem('swiped_sample_profiles');
+    return swiped ? JSON.parse(swiped) : [];
+  } catch {
+    return [];
+  }
+};
+
+const addSwipedSampleProfile = (profileId: string) => {
+  try {
+    const swiped = getSwipedSampleProfiles();
+    if (!swiped.includes(profileId)) {
+      swiped.push(profileId);
+      localStorage.setItem('swiped_sample_profiles', JSON.stringify(swiped));
+    }
+  } catch {
+    // Ignore localStorage errors
+  }
+};
 
 export const useProfiles = () => {
   const { user } = useAuth();
@@ -112,19 +134,26 @@ export const useProfiles = () => {
       const swipedUserIds = swipedUsers?.map(s => s.swiped_id) || [];
       
       // Get profiles excluding current user and already swiped users
-      const { data: profilesData, error } = await supabase
+      let query = supabase
         .from("profiles")
         .select("*")
-        .neq("user_id", user.id)
-        .not("user_id", "in", `(${swipedUserIds.join(",") || "''"})`);
+        .neq("user_id", user.id);
+
+      // Only add the not.in filter if there are actually swiped users
+      if (swipedUserIds.length > 0) {
+        query = query.not("user_id", "in", `(${swipedUserIds.join(",")})`);
+      }
+
+      const { data: profilesData, error } = await query;
 
       if (error) throw error;
       
       // If no real profiles exist, show sample profiles
       if (!profilesData || profilesData.length === 0) {
-        // Filter out any sample profiles that were already "swiped"
+        // Filter out any sample profiles that were already "swiped" locally
+        const swipedSampleIds = getSwipedSampleProfiles();
         const filteredSamples = sampleProfiles.filter(
-          profile => !swipedUserIds.includes(profile.user_id)
+          profile => !swipedSampleIds.includes(profile.user_id)
         );
         setProfiles(filteredSamples);
       } else {
@@ -133,7 +162,11 @@ export const useProfiles = () => {
     } catch (error) {
       console.error("Error fetching profiles:", error);
       // On error, fallback to sample profiles
-      setProfiles(sampleProfiles);
+      const swipedSampleIds = getSwipedSampleProfiles();
+      const filteredSamples = sampleProfiles.filter(
+        profile => !swipedSampleIds.includes(profile.user_id)
+      );
+      setProfiles(filteredSamples);
     } finally {
       setLoading(false);
     }
@@ -159,7 +192,25 @@ export const useProfiles = () => {
   const swipeProfile = async (profileId: string, isLike: boolean) => {
     if (!user) return;
 
-    // Record the swipe
+    // Check if this is a sample profile
+    const isSampleProfile = sampleProfiles.some(p => p.user_id === profileId);
+    
+    if (isSampleProfile) {
+      // Handle sample profile swiping locally
+      addSwipedSampleProfile(profileId);
+      
+      // Remove the profile from the current list
+      setProfiles(prev => prev.filter(p => p.user_id !== profileId));
+      
+      // For sample profiles, we can simulate a match sometimes
+      if (isLike && Math.random() > 0.7) {
+        return { match: true, error: null };
+      }
+      
+      return { match: false, error: null };
+    }
+
+    // Record the swipe for real profiles
     const { error: swipeError } = await supabase
       .from("user_swipes")
       .insert({
@@ -181,7 +232,7 @@ export const useProfiles = () => {
         .eq("swiper_id", profileId)
         .eq("swiped_id", user.id)
         .eq("is_like", true)
-        .single();
+        .maybeSingle();
 
       if (mutualSwipe) {
         // Create a match

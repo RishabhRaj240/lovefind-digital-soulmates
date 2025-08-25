@@ -36,6 +36,13 @@ const Dashboard = () => {
 
   // Navigate to messages
   const handleMessage = async (userId: string) => {
+    // Check if this is a sample profile
+    const isSampleProfile = userId.startsWith('550e8400-e29b-41d4-a716-44665544000');
+    if (isSampleProfile) {
+      toast.success("This is a demo profile. In the real app, you'd start a conversation here! 💬");
+      return;
+    }
+    
     const conversationId = await createConversation(userId);
     if (conversationId) {
       navigate(`/conversation/${conversationId}`);
